@@ -33,9 +33,11 @@ let player = {
 }
 
 let mat = {
-	ring : new THREE.MeshStandardMaterial( {color: 'blue', emissive: 'red', metalness: 1, roughness: 0.5} ),
-	player : new THREE.MeshNormalMaterial(),
-	ball : new THREE.MeshStandardMaterial( {color: 'red', emissive: 'blue', metalness: 1, roughness: 0.5} )
+	ring : new THREE.MeshStandardMaterial( {color: 'red', emissive: 'blue', emissiveIntensity: 0.5, metalness: 0, roughness: 0} ),
+	p1 : new THREE.MeshStandardMaterial( {color: '#4deeea', emissive: '#4deeea', emissiveIntensity: 0.5, metalness: 0, roughness: 0.5} ),
+	p2 : new THREE.MeshStandardMaterial( {color: '#ffe700', emissive: '#ffe700', emissiveIntensity: 0.5, metalness: 0, roughness: 0.5} ),
+	ball : new THREE.MeshStandardMaterial( {color: '#0bff01', emissive: 'green', emissiveIntensity: 1, metalness: 0, roughness: 0} ),
+	score : new THREE.MeshStandardMaterial( {color: '#0bff01', emissive: 'green', emissiveIntensity: 1, metalness: 1, roughness: 0.5} ),
 }
 
 
@@ -62,8 +64,8 @@ r_right.position.set(((ring.y - ring.h) / 2),0,0);
 const ring3D = new THREE.Group();
 ring3D.add(r_bottom, r_top, r_left, r_right);
 
-const p1 = new THREE.Mesh(new THREE.BoxGeometry(player.h,player.y ,player.z), mat.player);
-const p2 = new THREE.Mesh(new THREE.BoxGeometry(player.h,player.y ,player.z), mat.player);
+const p1 = new THREE.Mesh(new THREE.BoxGeometry(player.h,player.y ,player.z), mat.p1);
+const p2 = new THREE.Mesh(new THREE.BoxGeometry(player.h,player.y ,player.z), mat.p2);
 p1.position.set(-(ring.y * 2/5),0,0);
 p2.position.set((ring.y * 2/5),0,0);
 
@@ -87,7 +89,8 @@ let p2_hit = 0;
 ball.position.set(0,0,0);
 
 let dirLight = new THREE.DirectionalLight( 0xffffff, 10 );
-dirLight.position.set( 10, 7, 40 ).normalize();
+dirLight.position.set( 0, 0, 400 );
+dirLight.target = ball;
 scene.add( dirLight );
 
 const game = new THREE.Group();
@@ -104,12 +107,7 @@ refresh_score();
 
 renderer.render( scene, camera );
 
-function animate() {
-
-	// game.rotation.y += 0.05;
-	// game.rotation.x += 0.01;
-	// game.rotation.z += 0.01;
-	
+function animate() {	
 	if ((ball.position.x - ball_radius - ball_speed < p1.position.x + player.h / 2)
 		&& (ball.position.x - ball_radius > p1.position.x - player.h / 2)
 		&& (ball.position.y - ball_radius < p1.position.y + player.y / 2)
@@ -133,11 +131,7 @@ function animate() {
 		p2_hit = 0;		
 	}
 	if ((ball.position.y + ball_radius > ring.x / 2)
-		|| (ball.position.y - ball_radius < -ring.x / 2 ))
-		// || (ball.position.y + ball_radius > p1.position.y)
-		// && (ball.position.x - ball_radius < p1.position.x - player.h / 2)
-		// && (ball.position.x + ball_radius > p1.position.x + player.h / 2)) //muro orizzontale
-		{
+		|| (ball.position.y - ball_radius < -ring.x / 2 )){
 			angle *= -1;
 		}
 	else if (ball.position.x - ball_radius < r_left.position.x + ring.h) {
@@ -164,8 +158,7 @@ function animate() {
 }
 
 document.addEventListener("keydown", function(event) {
-	if (event.key == 'r')
-	{
+	if (event.key == 'r') {
 		p1_score = 0;
 		p2_score = 0;
 		restart_game();
@@ -232,7 +225,7 @@ function refresh_score() {
 		const geometry = new TextGeometry( p1_score + ' : ' + p2_score, {
 			font: font,
 			size: 10,
-			depth: 5,
+			depth: 1,
 			curveSegments: 12,
 			bevelEnabled: false,
 			bevelThickness: 1,
@@ -240,7 +233,7 @@ function refresh_score() {
 			bevelOffset: 1,
 			bevelSegments: 5
 		} );
-		const txt = new THREE.Mesh(geometry, new THREE.MeshNormalMaterial());
+		const txt = new THREE.Mesh(geometry, mat.score);
 		txt.name = 'txt';
 		txt.position.set(-12.4,ring.y / 3,0);
 		console.log( font );
