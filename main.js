@@ -5,7 +5,6 @@ import { Group, remove } from 'three/examples/jsm/libs/tween.module.js';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-// camera.position.z = 5;
 let look = {
 	x : 0,
 	y : 0,
@@ -137,12 +136,12 @@ function animate() {
 	else if (ball.position.x - ball_radius < r_left.position.x + ring.h) {
 		console.log("p2 ha segnato");
 		p2_score += 1;
-		restart_game();
+		score();
 	}
 	else if (ball.position.x + ball_radius > r_right.position.x - ring.h) {
 		console.log("p1 ha segnato");
 		p1_score += 1;
-		restart_game();
+		score();
 	}
 	ball.position.y += ball_speed * -Math.sin(angle * Math.PI /180);
 	ball.position.x += ball_speed * Math.cos(angle * Math.PI /180);
@@ -154,7 +153,6 @@ function animate() {
 		p2.position.y += p2_move_y;
 
 	renderer.render( scene, camera );
-
 }
 
 document.addEventListener("keydown", function(event) {
@@ -186,10 +184,19 @@ document.addEventListener("keydown", function(event) {
 	
   });
 
-  document.addEventListener("scroll", function (event){
-	// if (event.)
-	// console.log(event.);
-  });
+document.addEventListener("wheel", function(event) {
+	cam.z += event.deltaY / 10;
+	camera.position.set(cam.x,cam.y, cam.z );
+});
+
+// document.addEventListener("mousemove", function(event) {
+// 	const rect = renderer.domElement.getBoundingClientRect();
+// 	const mouse = {
+// 		x: ((event.clientX - rect.left) / rect.width) * 2 - 1,
+// 		y: -((event.clientY - rect.top) / rect.height) * 2 + 1
+// 	};
+// 	console.log(mouse);
+// });
 
   function restart_game(){
 	game.remove(game.getObjectByName('txt'));
@@ -204,14 +211,28 @@ document.addEventListener("keydown", function(event) {
 		angle *= -1;
 	if (angle % 3)
 		angle += 180;
-	cam.x = 0;
-	cam.y = 0;
-	look.x = 0;
-	look.y = 0;
-	look.z = 0;
-	camera.position.set(0,0, cam.z );
-	camera.lookAt( 0,0,0 )
+	cam = {x : 0, y : 0,z : 100};
+	look = {x : 0, y : 0,z : 0};
+	camera.position.set(cam.x,cam.y, cam.z );
+	camera.lookAt( look.x,look.y,look.z )
   }
+
+function score(){
+	game.remove(game.getObjectByName('txt'));
+	scene.remove(scene.getObjectByName('txt'));
+	refresh_score();
+	ball.position.set(0, 0, 0);
+	ball_speed = ring.y / 150;
+	angle =  Math.floor(Math.random() * 70);
+	if (angle % 2)
+		angle *= -1;
+	if (angle % 3)
+		angle += 180;
+}
+
+function game_over(){
+
+}
 
 function refresh_score() {
 	const loader = new FontLoader();
@@ -236,14 +257,13 @@ function refresh_score() {
 		const txt = new THREE.Mesh(geometry, mat.score);
 		txt.name = 'txt';
 		txt.position.set(-12.4,ring.y / 3,0);
-		console.log( font );
 		scene.add(txt);
 		game.add(txt);
 	},
 
 	// onProgress callback
 	function ( xhr ) {
-		console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+		// console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
 	},
 
 	// onError callback
@@ -252,3 +272,5 @@ function refresh_score() {
 	}
 );
 }
+
+

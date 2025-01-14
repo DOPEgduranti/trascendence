@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "serve": "^14.2.4",
     "three": "^0.171.0"
   },
   "devDependencies": {
