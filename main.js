@@ -40,7 +40,7 @@ let ball_color = 0x00ff00;
 let ball_radius = ring_y / 80;
 
 const r_bottom = new THREE.Mesh(new THREE.BoxGeometry(ring_y, ring_h, ring_z),
-	new THREE.MeshPhysicalMaterial());
+	new THREE.MeshPhysicalMaterial( {color: 'red'} ));
 const r_top = new THREE.Mesh(new THREE.BoxGeometry(ring_y, ring_h, ring_z),
 	new THREE.MeshPhysicalMaterial());
 const r_left = new THREE.Mesh(new THREE.BoxGeometry(ring_h, ring_x, ring_z),
@@ -69,8 +69,8 @@ let p2_score = 0;
 let p1_move_y = 0;
 let p2_move_y = 0;
 
-const ball = new THREE.Mesh( new THREE.SphereGeometry( ball_radius ),
-	new THREE.MeshNormalMaterial( ) );
+const m = new THREE.MeshStandardMaterial({color: 'red'});
+const ball = new THREE.Mesh( new THREE.SphereGeometry( ball_radius ), m );
 let ball_speed = ring_y/150;
 let angle =  Math.floor(Math.random() * 70);
 if (angle % 2)
@@ -83,13 +83,20 @@ let p2_hit = 0;
 ball.position.set(0,0,0);
 
 let dirLight = new THREE.DirectionalLight( 0xffffff, 10 );
-dirLight.position.set( 10, 3, 10 ).normalize();
+dirLight.position.set( 10, 7, 40 ).normalize();
 scene.add( dirLight );
 
 const game = new THREE.Group();
 game.add(ring, p1, p2, ball);
 scene.add(game);
 refresh_score();
+
+// const map = new THREE.TextureLoader().load( 'gungeon.png' );
+// const material = new THREE.SpriteMaterial( { map: map, color: 0xffffff } );
+
+// const sprite = new THREE.Sprite( material );
+// sprite.scale.set(20, 20, 1)
+// scene.add( sprite );
 
 renderer.render( scene, camera );
 
