@@ -159,9 +159,9 @@ document.addEventListener("keydown", function(event) {
 		p2_score = 0;
 		restart_game();
 	}
-	if (event.key == 'w')
+	if (event.key.toLowerCase() == 'w')
 		p1_move_y = ring_y/125;
-	if (event.key == 's')
+	if (event.key.toLowerCase() == 's')
 		p1_move_y = -ring_y/125;
 	if (event.key == 'ArrowUp')
 		p2_move_y = ring_y/125;
@@ -189,9 +189,9 @@ document.addEventListener("keydown", function(event) {
   });
 
   document.addEventListener("keyup", function(event) {
-	if (event.key == 'w')
+	if (event.key.toLowerCase() == 'w')
 		p1_move_y = 0;
-	if (event.key == 's')
+	if (event.key.toLowerCase() == 's')
 		p1_move_y = 0;
 	if (event.key == 'ArrowUp')
 		p2_move_y = 0;
