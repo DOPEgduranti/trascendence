@@ -1,24 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>My first three.js app</title>
-		<style>
-			body { margin: 0; }
-		</style>
-		<script type="importmap">
-			{
-			  "imports": {
-				"three": "https://cdn.jsdelivr.net/npm/three@<v0.171.0>/build/three.module.js",
-				"three/addons/": "https://cdn.jsdelivr.net/npm/three@<v0.171.0>/examples/jsm/"
-			  }
-			}
-		  </script>
-	</head>
-	<body>
-		<div>
-			<script type="module" src="/main.js"></script>
-		</div>
-	</body>
+<head>
+    <meta charset="utf-8">
+    <title>My first three.js app</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        #menu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+        }
+        #menu button {
+            display: block;
+            margin: 10px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.171.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.171.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
+    <div id="menu">
+        <button id="startButton">Start Game</button>
+        <button id="settingsButton">Settings</button>
+        <button id="exitButton">Exit</button>
+    </div>
+    <script type="module" src="/main.js"></script>
+</body>
 </html>
-

@@ -97,16 +97,12 @@ game.add(ring3D, p1, p2, ball);
 scene.add(game);
 refresh_score();
 
-// const map = new THREE.TextureLoader().load( 'gungeon.png' );
-// const material = new THREE.SpriteMaterial( { map: map, color: 0xffffff } );
-
-// const sprite = new THREE.Sprite( material );
-// sprite.scale.set(20, 20, 1)
-// scene.add( sprite );
-
 renderer.render( scene, camera );
 
-function animate() {	
+let isPaused = true;
+
+function animate() {
+	if (!isPaused){
 	if ((ball.position.x - ball_radius - ball_speed < p1.position.x + player.h / 2)
 		&& (ball.position.x - ball_radius > p1.position.x - player.h / 2)
 		&& (ball.position.y - ball_radius < p1.position.y + player.y / 2)
@@ -153,7 +149,11 @@ function animate() {
 		p2.position.y += p2_move_y;
 
 	renderer.render( scene, camera );
+	}
 }
+
+requestAnimationFrame(animate);
+
 
 document.addEventListener("keydown", function(event) {
 	if (event.key == 'r') {
@@ -170,6 +170,13 @@ document.addEventListener("keydown", function(event) {
 	if (event.key == 'ArrowDown')
 		p2_move_y = -ring.y/125;
 		console.log(event);
+	if (event.key == 'Escape') {
+		isPaused = true;
+		document.getElementById('menu').style.display = 'block';
+	}
+	if (event.key.toLowerCase() == 'p') {
+		isPaused = !isPaused;
+	}
   });
 
   document.addEventListener("keyup", function(event) {
@@ -273,4 +280,24 @@ function refresh_score() {
 );
 }
 
+document.getElementById('startButton').addEventListener('click', startGame);
+document.getElementById('settingsButton').addEventListener('click', showSettings);
+document.getElementById('exitButton').addEventListener('click', exitGame);
+
+function startGame() {
+    document.getElementById('menu').style.display = 'none';
+    isPaused = false;
+    animate();
+}
+
+function showSettings() {
+    alert('Settings menu not implemented yet.');
+}
+
+function exitGame() {
+    alert('Exit game not implemented yet.');
+}
+
+// Show the menu initially
+document.getElementById('menu').style.display = 'block';
 
