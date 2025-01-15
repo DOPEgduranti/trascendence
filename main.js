@@ -40,6 +40,7 @@ let mat = {
 }
 
 let isPaused = true;
+let isStarted = false;
 
 camera.position.set(cam.x,cam.y, cam.z );
 camera.lookAt( look.x,look.y,look.z );
@@ -104,50 +105,64 @@ scene.add(game);
 
 renderer.render( scene, camera );
 
-function animate() {
-	if (!isPaused){
+function p1IsHit()
+{
 	if ((ball.position.x - ball_radius - ball_speed < p1.position.x + player.h / 2)
 		&& (ball.position.x - ball_radius > p1.position.x - player.h / 2)
 		&& (ball.position.y - ball_radius < p1.position.y + player.y / 2)
-		&& (ball.position.y + ball_radius > p1.position.y - player.y / 2)) {
-		hit_position = (ball.position.y - p1.position.y);
-		p1_hit = 1;
-		angle = hit_position / (player.h,player.y) * -90;
-		if (ball_speed < 5 * player.h )
-			ball_speed += 0.1;
-	} //p1
-	else if	((ball.position.x + ball_radius + ball_speed > p2.position.x - player.h / 2 )
+		&& (ball.position.y + ball_radius > p1.position.y - player.y / 2))
+		return true;
+	return false;	
+}
+
+function p2IsHit()
+{
+	if ((ball.position.x + ball_radius + ball_speed > p2.position.x - player.h / 2 )
 		&& (ball.position.x + ball_radius < p2.position.x + player.h / 2)
 		&& (ball.position.y + ball_radius > p2.position.y - player.y / 2)
-		&& (ball.position.y - ball_radius < p2.position.y + player.y / 2)) {
-		hit_position = (ball.position.y - p2.position.y);
-		p2_hit = 1;
-		angle = 180 + (hit_position / (player.h,player.y) * 90);
-		if (ball_speed < 5 * player.h )
-			ball_speed += 0.1;
-	}
-	else if ((ball.position.y + ball_radius > ring.x / 2)
-		|| (ball.position.y - ball_radius < -ring.x / 2 )){
-			angle *= -1;
+		&& (ball.position.y - ball_radius < p2.position.y + player.y / 2))
+		return true;
+	return false;	
+}
+
+function animate() {
+	if (!isPaused) {
+		if (p1IsHit()) {
+			hit_position = (ball.position.y - p1.position.y);
+			p1_hit = 1;
+			angle = hit_position / (player.h,player.y) * -90;
+			if (ball_speed < 5 * player.h )
+				ball_speed += 0.1;
+		} //p1
+		else if	(p2IsHit()) {
+			hit_position = (ball.position.y - p2.position.y);
+			p2_hit = 1;
+			angle = 180 + (hit_position / (player.h,player.y) * 90);
+			if (ball_speed < 5 * player.h )
+				ball_speed += 0.1;
 		}
-	else if (ball.position.x - ball_radius < r_left.position.x + ring.h) {
-		console.log("p2 ha segnato");
-		p2_score += 1;
-		score();
-	}
-	else if (ball.position.x + ball_radius > r_right.position.x - ring.h) {
-		console.log("p1 ha segnato");
-		p1_score += 1;
-		score();
-	}
-	ball.position.y += ball_speed * -Math.sin(angle * Math.PI /180);
-	ball.position.x += ball_speed * Math.cos(angle * Math.PI /180);
-	if ((p1_move_y > 0 && p1.position.y < ring.x / 2 - player.y / 2) 
-		|| (p1_move_y < 0 && p1.position.y > - ring.x / 2 + player.y / 2))
-		p1.position.y += p1_move_y;
-	if ((p2_move_y > 0 && p2.position.y < ring.x / 2 - player.y / 2)
-		|| (p2_move_y < 0 && p2.position.y > - ring.x / 2 + player.y / 2))
-		p2.position.y += p2_move_y;
+		else if ((ball.position.y + ball_radius > ring.x / 2)
+			|| (ball.position.y - ball_radius < -ring.x / 2 )){
+				angle *= -1;
+			}
+		else if (ball.position.x - ball_radius < r_left.position.x + ring.h) {
+			console.log("p2 ha segnato");
+			p2_score += 1;
+			score();
+		}
+		else if (ball.position.x + ball_radius > r_right.position.x - ring.h) {
+			console.log("p1 ha segnato");
+			p1_score += 1;
+			score();
+		}
+		ball.position.y += ball_speed * -Math.sin(angle * Math.PI /180);
+		ball.position.x += ball_speed * Math.cos(angle * Math.PI /180);
+		if ((p1_move_y > 0 && p1.position.y < ring.x / 2 - player.y / 2) 
+			|| (p1_move_y < 0 && p1.position.y > - ring.x / 2 + player.y / 2))
+			p1.position.y += p1_move_y;
+		if ((p2_move_y > 0 && p2.position.y < ring.x / 2 - player.y / 2)
+			|| (p2_move_y < 0 && p2.position.y > - ring.x / 2 + player.y / 2))
+			p2.position.y += p2_move_y;
 
 	}
 	renderer.render( scene, camera );
@@ -158,9 +173,6 @@ requestAnimationFrame(animate);
 
 
 document.addEventListener("keydown", function(event) {
-	if (event.key == 'r') {
-		restart_game();
-	}
 	if (event.key.toLowerCase() == 'w')
 		p1_move_y = ring.y/125;
 	if (event.key.toLowerCase() == 's')
@@ -170,7 +182,7 @@ document.addEventListener("keydown", function(event) {
 	if (event.key == 'ArrowDown')
 		p2_move_y = -ring.y/125;
 		console.log(event);
-	if (event.key == 'Escape') {
+	if (event.key == 'Escape' && isStarted) {
 		if (isPaused == false)
 			isPaused = true;
 		else
@@ -291,6 +303,7 @@ document.getElementById('exitButton').addEventListener('click', exitGame);
 function newGame() {
     document.getElementById('menu').style.display = 'none';
 	restart_game();
+	isStarted = true;
     isPaused = false;
     animate();
 }
