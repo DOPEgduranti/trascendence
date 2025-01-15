@@ -48,7 +48,12 @@ renderer.setSize( window.innerWidth,window.innerHeight );
 renderer.setAnimationLoop( animate );
 document.body.appendChild( renderer.domElement );
 
-
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+	renderer.render(scene, camera);
+});
 
 const r_bottom = new THREE.Mesh(new THREE.BoxGeometry(ring.y, ring.h, ring.z),mat.ring);
 const r_top = new THREE.Mesh(new THREE.BoxGeometry(ring.y, ring.h, ring.z), mat.ring);
@@ -97,16 +102,12 @@ game.add(ring3D, p1, p2, ball);
 scene.add(game);
 refresh_score();
 
-// const map = new THREE.TextureLoader().load( 'gungeon.png' );
-// const material = new THREE.SpriteMaterial( { map: map, color: 0xffffff } );
-
-// const sprite = new THREE.Sprite( material );
-// sprite.scale.set(20, 20, 1)
-// scene.add( sprite );
-
 renderer.render( scene, camera );
 
-function animate() {	
+let isPaused = true;
+
+function animate() {
+	if (!isPaused){
 	if ((ball.position.x - ball_radius - ball_speed < p1.position.x + player.h / 2)
 		&& (ball.position.x - ball_radius > p1.position.x - player.h / 2)
 		&& (ball.position.y - ball_radius < p1.position.y + player.y / 2)
@@ -153,12 +154,14 @@ function animate() {
 		p2.position.y += p2_move_y;
 
 	renderer.render( scene, camera );
+	}
 }
+
+requestAnimationFrame(animate);
+
 
 document.addEventListener("keydown", function(event) {
 	if (event.key == 'r') {
-		p1_score = 0;
-		p2_score = 0;
 		restart_game();
 	}
 	if (event.key.toLowerCase() == 'w')
@@ -170,6 +173,16 @@ document.addEventListener("keydown", function(event) {
 	if (event.key == 'ArrowDown')
 		p2_move_y = -ring.y/125;
 		console.log(event);
+	if (event.key == 'Escape') {
+		if (isPaused == false)
+			isPaused = true;
+		else
+			isPaused = false;
+		if (document.getElementById('menu').style.display == 'block')
+			document.getElementById('menu').style.display = 'none';
+		else
+		document.getElementById('menu').style.display = 'block';
+	}
   });
 
   document.addEventListener("keyup", function(event) {
@@ -201,6 +214,8 @@ document.addEventListener("wheel", function(event) {
   function restart_game(){
 	game.remove(game.getObjectByName('txt'));
 	scene.remove(scene.getObjectByName('txt'));
+	p1_score = 0;
+	p2_score = 0;
 	refresh_score();
 	ball.position.set(0, 0, 0);
 	ball_speed = ring.y / 150;
@@ -273,4 +288,25 @@ function refresh_score() {
 );
 }
 
+document.getElementById('newGameButton').addEventListener('click', newGame);
+document.getElementById('settingsButton').addEventListener('click', showSettings);
+document.getElementById('exitButton').addEventListener('click', exitGame);
+
+function newGame() {
+    document.getElementById('menu').style.display = 'none';
+	restart_game();
+    isPaused = false;
+    animate();
+}
+
+function showSettings() {
+    alert('Settings menu not implemented yet.');
+}
+
+function exitGame() {
+    alert('Exit game not implemented yet.');
+}
+
+// Show the menu initially
+document.getElementById('menu').style.display = 'block';
 

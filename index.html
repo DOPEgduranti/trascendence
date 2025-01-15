@@ -1,24 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>My first three.js app</title>
-		<style>
-			body { margin: 0; }
-		</style>
-		<script type="importmap">
-			{
-			  "imports": {
-				"three": "https://cdn.jsdelivr.net/npm/three@<v0.171.0>/build/three.module.js",
-				"three/addons/": "https://cdn.jsdelivr.net/npm/three@<v0.171.0>/examples/jsm/"
-			  }
-			}
-		  </script>
-	</head>
-	<body>
-		<div>
-			<script type="module" src="/main.js"></script>
+<head>
+    <meta charset="utf-8">
+    <title>My first three.js app</title>
+	<link rel="stylesheet" type="text/css" href="index.css">
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.171.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.171.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
+	<div class="gamecontainer">
+		<div id="menu">
+			<button id="newGameButton">New Game</button>
+			<button id="settingsButton">Settings</button>
+			<button id="exitButton">Exit</button>
 		</div>
-	</body>
+        <script type="module" src="/main.js"></script>
+    </div>
+</body>
 </html>
-
