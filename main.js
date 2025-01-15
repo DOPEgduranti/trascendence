@@ -303,26 +303,86 @@ function refresh_score() {
 );
 }
 
-document.getElementById('newGameButton').addEventListener('click', newGame);
-document.getElementById('settingsButton').addEventListener('click', showSettings);
+document.getElementById('newGameButton').addEventListener('click', showGameModeMenu);
+document.getElementById('settingsButton').addEventListener('click', showSettingsMenu);
 document.getElementById('exitButton').addEventListener('click', exitGame);
+document.getElementById('onePlayerButton').addEventListener('click', startOnePlayerGame);
+document.getElementById('twoPlayerButton').addEventListener('click', startTwoPlayerGame);
+document.getElementById('practiceButton').addEventListener('click', startPracticeGame);
+document.getElementById('backButton').addEventListener('click', showMainMenu);
+document.getElementById('saveSettingsButton').addEventListener('click', saveSettings);
+document.getElementById('backFromSettingsButton').addEventListener('click', showMainMenu);
 
-function newGame() {
+function showGameModeMenu() {
     document.getElementById('menu').style.display = 'none';
-	restart_game();
-	isStarted = true;
+    document.getElementById('gameModeMenu').style.display = 'block';
+}
+
+function showMainMenu() {
+    document.getElementById('gameModeMenu').style.display = 'none';
+    document.getElementById('settingsMenu').style.display = 'none';
+    document.getElementById('menu').style.display = 'block';
+}
+
+function showSettingsMenu() {
+    document.getElementById('menu').style.display = 'none';
+    document.getElementById('settingsMenu').style.display = 'block';
+}
+
+function startOnePlayerGame() {
+    document.getElementById('gameModeMenu').style.display = 'none';
+    restart_game();
+    isStarted = true;
     isPaused = false;
     animate();
 }
 
-function showSettings() {
-    alert('Settings menu not implemented yet.');
+function startTwoPlayerGame() {
+    document.getElementById('gameModeMenu').style.display = 'none';
+    restart_game();
+    isStarted = true;
+    isPaused = false;
+    animate();
+}
+
+function startPracticeGame() {
+    document.getElementById('gameModeMenu').style.display = 'none';
+    restart_game();
+    isStarted = true;
+    isPaused = false;
+    animate();
+}
+
+function saveSettings() {
+    const playerHeight = parseFloat(document.getElementById('playerHeight').value);
+    const playerWidth = parseFloat(document.getElementById('playerWidth').value);
+    const playerDepth = parseFloat(document.getElementById('playerDepth').value);
+
+    player.y = playerHeight;
+    player.h = playerWidth;
+    player.z = playerDepth;
+	
+	p1.geometry.dispose();
+    p1.geometry = new THREE.BoxGeometry(player.h, player.y, player.z);
+    p2.geometry.dispose();
+    p2.geometry = new THREE.BoxGeometry(player.h, player.y, player.z);
+
+	
+    showMainMenu();
 }
 
 function exitGame() {
-    alert('Exit game not implemented yet.');
+    isStarted = false;
+    isPaused = true;
+	player.h = 2.5;
+	player.y = ring.x / 6;
+	player.z = 5;
+	p1.geometry.dispose();
+	p2.geometry.dispose();
+	p1.geometry = new THREE.BoxGeometry(player.h, player.y, player.z);
+	p2.geometry = new THREE.BoxGeometry(player.h, player.y, player.z);
+    restart_game();
 }
 
-// Show the menu initially
 document.getElementById('menu').style.display = 'block';
 

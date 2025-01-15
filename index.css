@@ -3,7 +3,7 @@ body {
     overflow: hidden;
 }
 
-#menu {
+#menu, #gameModeMenu, #settingsMenu {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -13,12 +13,21 @@ body {
     border-radius: 10px;
     text-align: center;
     display: none;
+	color: rgb(194, 37, 155);
+	border-color: aquamarine;
+	border: 2px solid;
 }
 
-#menu button {
+#menu button, #gameModeMenu button, #settingsMenu button {
     display: block;
     margin: 10px auto;
     padding: 10px 20px;
+    font-size: 16px;
+}
+
+#settingsMenu label, #settingsMenu input {
+    display: block;
+    margin: 10px auto;
     font-size: 16px;
 }
 

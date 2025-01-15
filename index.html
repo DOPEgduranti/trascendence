@@ -20,6 +20,22 @@
 			<button id="settingsButton">Settings</button>
 			<button id="exitButton">Exit</button>
 		</div>
+		<div id="gameModeMenu" style="display: none;">
+            <button id="onePlayerButton">1 Player</button>
+            <button id="twoPlayerButton">2 Player</button>
+            <button id="practiceButton">Practice</button>
+            <button id="backButton">Back</button>
+        </div>
+		<div id="settingsMenu" style="display: none;">
+            <label for="playerHeight">Player Height:</label>
+            <input type="number" id="playerHeight" name="playerHeight" value="10">
+            <label for="playerWidth">Player Width:</label>
+            <input type="number" id="playerWidth" name="playerWidth" value="2.5">
+            <label for="playerDepth">Player Depth:</label>
+            <input type="number" id="playerDepth" name="playerDepth" value="5">
+            <button id="saveSettingsButton">Save</button>
+            <button id="backFromSettingsButton">Back</button>
+        </div>
         <script type="module" src="/main.js"></script>
     </div>
 </body>
