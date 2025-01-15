@@ -157,8 +157,6 @@ requestAnimationFrame(animate);
 
 document.addEventListener("keydown", function(event) {
 	if (event.key == 'r') {
-		p1_score = 0;
-		p2_score = 0;
 		restart_game();
 	}
 	if (event.key.toLowerCase() == 'w')
@@ -211,6 +209,8 @@ document.addEventListener("wheel", function(event) {
   function restart_game(){
 	game.remove(game.getObjectByName('txt'));
 	scene.remove(scene.getObjectByName('txt'));
+	p1_score = 0;
+	p2_score = 0;
 	refresh_score();
 	ball.position.set(0, 0, 0);
 	ball_speed = ring.y / 150;
