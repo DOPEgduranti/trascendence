@@ -171,11 +171,14 @@ document.addEventListener("keydown", function(event) {
 		p2_move_y = -ring.y/125;
 		console.log(event);
 	if (event.key == 'Escape') {
-		isPaused = true;
+		if (isPaused == false)
+			isPaused = true;
+		else
+			isPaused = false;
+		if (document.getElementById('menu').style.display == 'block')
+			document.getElementById('menu').style.display = 'none';
+		else
 		document.getElementById('menu').style.display = 'block';
-	}
-	if (event.key.toLowerCase() == 'p') {
-		isPaused = !isPaused;
 	}
   });
 
@@ -280,12 +283,13 @@ function refresh_score() {
 );
 }
 
-document.getElementById('startButton').addEventListener('click', startGame);
+document.getElementById('newGameButton').addEventListener('click', newGame);
 document.getElementById('settingsButton').addEventListener('click', showSettings);
 document.getElementById('exitButton').addEventListener('click', exitGame);
 
-function startGame() {
+function newGame() {
     document.getElementById('menu').style.display = 'none';
+	restart_game();
     isPaused = false;
     animate();
 }
