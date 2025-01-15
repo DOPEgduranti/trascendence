@@ -39,6 +39,7 @@ let mat = {
 	score : new THREE.MeshStandardMaterial( {color: '#0bff01', emissive: 'green', emissiveIntensity: 1, metalness: 1, roughness: 0.5} ),
 }
 
+let isPaused = true;
 
 camera.position.set(cam.x,cam.y, cam.z );
 camera.lookAt( look.x,look.y,look.z );
@@ -52,7 +53,7 @@ window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-	renderer.render(scene, camera);
+	// renderer.render(scene, camera);
 });
 
 const r_bottom = new THREE.Mesh(new THREE.BoxGeometry(ring.y, ring.h, ring.z),mat.ring);
@@ -100,11 +101,8 @@ scene.add( dirLight );
 const game = new THREE.Group();
 game.add(ring3D, p1, p2, ball);
 scene.add(game);
-refresh_score();
 
 renderer.render( scene, camera );
-
-let isPaused = true;
 
 function animate() {
 	if (!isPaused){
@@ -115,6 +113,8 @@ function animate() {
 		hit_position = (ball.position.y - p1.position.y);
 		p1_hit = 1;
 		angle = hit_position / (player.h,player.y) * -90;
+		if (ball_speed < 5 * player.h )
+			ball_speed += 0.1;
 	} //p1
 	else if	((ball.position.x + ball_radius + ball_speed > p2.position.x - player.h / 2 )
 		&& (ball.position.x + ball_radius < p2.position.x + player.h / 2)
@@ -123,14 +123,10 @@ function animate() {
 		hit_position = (ball.position.y - p2.position.y);
 		p2_hit = 1;
 		angle = 180 + (hit_position / (player.h,player.y) * 90);
+		if (ball_speed < 5 * player.h )
+			ball_speed += 0.1;
 	}
-	if (p1_hit || p2_hit) {
-	if (ball_speed < 5 * player.h )
-		ball_speed += 0.1;
-		p1_hit = 0;
-		p2_hit = 0;		
-	}
-	if ((ball.position.y + ball_radius > ring.x / 2)
+	else if ((ball.position.y + ball_radius > ring.x / 2)
 		|| (ball.position.y - ball_radius < -ring.x / 2 )){
 			angle *= -1;
 		}
@@ -153,11 +149,12 @@ function animate() {
 		|| (p2_move_y < 0 && p2.position.y > - ring.x / 2 + player.y / 2))
 		p2.position.y += p2_move_y;
 
-	renderer.render( scene, camera );
 	}
+	renderer.render( scene, camera );
 }
 
 requestAnimationFrame(animate);
+
 
 
 document.addEventListener("keydown", function(event) {
@@ -212,7 +209,6 @@ document.addEventListener("wheel", function(event) {
 // });
 
   function restart_game(){
-	game.remove(game.getObjectByName('txt'));
 	scene.remove(scene.getObjectByName('txt'));
 	p1_score = 0;
 	p2_score = 0;
@@ -233,7 +229,8 @@ document.addEventListener("wheel", function(event) {
   }
 
 function score(){
-	game.remove(game.getObjectByName('txt'));
+	p2_hit = 0;
+	p1_hit = 0;
 	scene.remove(scene.getObjectByName('txt'));
 	refresh_score();
 	ball.position.set(0, 0, 0);
@@ -273,7 +270,6 @@ function refresh_score() {
 		txt.name = 'txt';
 		txt.position.set(-12.4,ring.y / 3,0);
 		scene.add(txt);
-		game.add(txt);
 	},
 
 	// onProgress callback
