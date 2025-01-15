@@ -21,13 +21,13 @@ let ring = {
 	x : 0,
 	y : 150,
 	z : 10,
-	h : 2
+	h : 3
 }
 ring.x = (9/16 * ring.y) - ring.h;
 
 let player = {
 	y : ring.x / 6,
-	h : 2,
+	h : 2.5,
 	z : 5
 }
 
@@ -107,28 +107,31 @@ renderer.render( scene, camera );
 
 function p1IsHit()
 {
-	if ((ball.position.x - ball_radius - ball_speed < p1.position.x + player.h / 2)
-		&& (ball.position.x - ball_radius > p1.position.x - player.h / 2)
-		&& (ball.position.y - ball_radius < p1.position.y + player.y / 2)
-		&& (ball.position.y + ball_radius > p1.position.y - player.y / 2))
+	if ((ball.position.x - ball_radius - ball_speed <= p1.position.x + player.h / 2)
+		&& (ball.position.x - ball_speed > p1.position.x - player.h / 2)
+		&& (ball.position.y - ball_radius <= p1.position.y + player.y / 2)
+		&& (ball.position.y + ball_radius >= p1.position.y - player.y / 2))
 		return true;
 	return false;	
 }
 
 function p2IsHit()
 {
-	if ((ball.position.x + ball_radius + ball_speed > p2.position.x - player.h / 2 )
-		&& (ball.position.x + ball_radius < p2.position.x + player.h / 2)
-		&& (ball.position.y + ball_radius > p2.position.y - player.y / 2)
-		&& (ball.position.y - ball_radius < p2.position.y + player.y / 2))
+	if ((ball.position.x + ball_radius + ball_speed >= p2.position.x - player.h / 2 )
+		&& (ball.position.x + ball_speed < p2.position.x + player.h / 2)
+		&& (ball.position.y - ball_radius <= p2.position.y + player.y / 2)
+		&& (ball.position.y + ball_radius >= p2.position.y - player.y / 2))
 		return true;
 	return false;	
 }
+
+let wallHitPosition = 0;
 
 function animate() {
 	if (!isPaused) {
 		if (p1IsHit()) {
 			hit_position = (ball.position.y - p1.position.y);
+			wallHitPosition = 0;
 			p1_hit = 1;
 			angle = hit_position / (player.h,player.y) * -90;
 			if (ball_speed < 5 * player.h )
@@ -136,13 +139,15 @@ function animate() {
 		} //p1
 		else if	(p2IsHit()) {
 			hit_position = (ball.position.y - p2.position.y);
+			wallHitPosition = 0;
 			p2_hit = 1;
 			angle = 180 + (hit_position / (player.h,player.y) * 90);
 			if (ball_speed < 5 * player.h )
 				ball_speed += 0.1;
 		}
-		else if ((ball.position.y + ball_radius > ring.x / 2)
-			|| (ball.position.y - ball_radius < -ring.x / 2 )){
+		else if ((wallHitPosition <= 0 && ball.position.y + ball_radius + ball_speed >= ring.x / 2)
+			|| (wallHitPosition >= 0 && ball.position.y - ball_radius - ball_speed <= -ring.x / 2 )){
+				wallHitPosition = ball.position.y;
 				angle *= -1;
 			}
 		else if (ball.position.x - ball_radius < r_left.position.x + ring.h) {
@@ -157,11 +162,11 @@ function animate() {
 		}
 		ball.position.y += ball_speed * -Math.sin(angle * Math.PI /180);
 		ball.position.x += ball_speed * Math.cos(angle * Math.PI /180);
-		if ((p1_move_y > 0 && p1.position.y < ring.x / 2 - player.y / 2) 
-			|| (p1_move_y < 0 && p1.position.y > - ring.x / 2 + player.y / 2))
+		if ((p1_move_y > 0 && p1.position.y + player.y / 2 <= ring.x / 2 - ring.h / 2) 
+			|| (p1_move_y < 0 && p1.position.y - player.y / 2 >= - ring.x / 2 + ring.h / 2))
 			p1.position.y += p1_move_y;
-		if ((p2_move_y > 0 && p2.position.y < ring.x / 2 - player.y / 2)
-			|| (p2_move_y < 0 && p2.position.y > - ring.x / 2 + player.y / 2))
+		if ((p2_move_y > 0 && p2.position.y + player.y / 2 <= ring.x / 2 - ring.h / 2)
+			|| (p2_move_y < 0 && p2.position.y - player.y / 2 >= - ring.x / 2 + ring.h / 2))
 			p2.position.y += p2_move_y;
 
 	}
@@ -174,13 +179,13 @@ requestAnimationFrame(animate);
 
 document.addEventListener("keydown", function(event) {
 	if (event.key.toLowerCase() == 'w')
-		p1_move_y = ring.y/125;
+		p1_move_y = ring.y/115;
 	if (event.key.toLowerCase() == 's')
-		p1_move_y = -ring.y/125;
+		p1_move_y = -ring.y/115;
 	if (event.key == 'ArrowUp')
-		p2_move_y = ring.y/125;
+		p2_move_y = ring.y/115;
 	if (event.key == 'ArrowDown')
-		p2_move_y = -ring.y/125;
+		p2_move_y = -ring.y/115;
 		console.log(event);
 	if (event.key == 'Escape' && isStarted) {
 		if (isPaused == false)
@@ -218,18 +223,19 @@ document.addEventListener("wheel", function(event) {
 // 		y: -((event.clientY - rect.top) / rect.height) * 2 + 1
 // 	};
 // 	console.log(mouse);
-// });
+// });Math.floor(Math.random() * 70)
 
   function restart_game(){
 	scene.remove(scene.getObjectByName('txt'));
 	p1_score = 0;
 	p2_score = 0;
+	wallHitPosition = 0;
 	refresh_score();
 	ball.position.set(0, 0, 0);
 	ball_speed = ring.y / 150;
 	p1.position.set(-(ring.y * 2/5),0,0);
 	p2.position.set((ring.y * 2/5),0,0);
-	angle =  Math.floor(Math.random() * 70);
+	angle = Math.floor(Math.random() * 70);
 	if (angle % 2)
 		angle *= -1;
 	if (angle % 3)
@@ -243,11 +249,12 @@ document.addEventListener("wheel", function(event) {
 function score(){
 	p2_hit = 0;
 	p1_hit = 0;
+	wallHitPosition = 0;
 	scene.remove(scene.getObjectByName('txt'));
 	refresh_score();
 	ball.position.set(0, 0, 0);
 	ball_speed = ring.y / 150;
-	angle =  Math.floor(Math.random() * 70);
+	angle = Math.floor(Math.random() * 70);
 	if (angle % 2)
 		angle *= -1;
 	if (angle % 3)
