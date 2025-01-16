@@ -44,6 +44,15 @@ body {
     font-size: 16px;
 }
 
+#gameOverImage {
+    position: absolute;
+    top: 0%;
+    /* transform: translate(-50%, -50%); */
+    max-width: 10%;
+    max-height: 10%;
+    display: none;
+}
+
 .gamecontainer {
     width: 100%;
     height: 100%;

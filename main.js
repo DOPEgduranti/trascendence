@@ -121,8 +121,10 @@ function createScore() {
 			bevelOffset: 1,
 			bevelSegments: 5
 		} );
+		geometry.computeBoundingBox();
+        const centerOffset = -0.5 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
 		scoreText = new THREE.Mesh(geometry, mat.score);
-		scoreText.position.set(-12.4,ring.y / 3,0);
+		scoreText.position.set(centerOffset,ring.y / 3,0);
 		scene.add(scoreText);
 	},
 
@@ -141,8 +143,8 @@ function createScore() {
 function updateScore() {
     if (scoreText) {
         scene.remove(scoreText);
-		createScore();
     }
+	createScore();
 }
 
 const game = new THREE.Group();
@@ -272,7 +274,9 @@ document.addEventListener("wheel", function(event) {
   function restart_game(){
 	p1_score = 0;
 	p2_score = 0;
-	wallHitPosition = 0;
+	wallHitPosition = 0;1
+	document.getElementById('gameOverImage').style.display = 'none';
+	removeWinnerText();
 	updateScore();
 	ball.position.set(0, 0, 0);
 	ball_speed = ring.y / 150;
@@ -307,9 +311,39 @@ function score(){
     }
 }
 
+let winnerText;
+
+function createWinnerText(winner) {
+    const loader = new FontLoader();
+    loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+        const geometry = new TextGeometry(`${winner} Wins!`, {
+            font: font,
+			size: 10,
+			depth: 1,
+			curveSegments: 12,
+            bevelEnabled: false,
+        });
+        geometry.computeBoundingBox();
+        const centerOffset = -0.5 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
+        winnerText = new THREE.Mesh(geometry, mat.score);
+        winnerText.position.set(centerOffset, 20, 0);
+        scene.add(winnerText);
+        renderer.render(scene, camera);
+    });
+}
+
+function removeWinnerText() {
+	if (winnerText) {
+		scene.remove(winnerText);
+	}
+}
+
 function game_over() {
     isStarted = false;
     isPaused = true;
+	document.getElementById('gameOverImage').style.display = 'block';
+	const winner = p1_score >= maxScore ? 'Player 1' : 'Player 2';
+    createWinnerText(winner);
     showMainMenu();
 }
 
