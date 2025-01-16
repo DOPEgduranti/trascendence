@@ -3,8 +3,8 @@ import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import { Group, remove } from 'three/examples/jsm/libs/tween.module.js';
 
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+// initializing variables
+
 let look = {
 	x : 0,
 	y : 0,
@@ -42,7 +42,12 @@ let mat = {
 let isPaused = true;
 let isStarted = false;
 const maxScore = 1;
+let wallHitPosition = 0;
 
+//Scene setup
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 camera.position.set(cam.x,cam.y, cam.z );
 camera.lookAt( look.x,look.y,look.z );
 
@@ -51,11 +56,15 @@ renderer.setSize( window.innerWidth,window.innerHeight );
 renderer.setAnimationLoop( animate );
 document.body.appendChild( renderer.domElement );
 
+//Resize handler
+
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
+//Ring setup
 
 const r_bottom = new THREE.Mesh(new THREE.BoxGeometry(ring.y, ring.h, ring.z),mat.ring);
 const r_top = new THREE.Mesh(new THREE.BoxGeometry(ring.y, ring.h, ring.z), mat.ring);
@@ -70,6 +79,9 @@ r_right.position.set(((ring.y - ring.h) / 2),0,0);
 const ring3D = new THREE.Group();
 ring3D.add(r_bottom, r_top, r_left, r_right);
 
+
+//Players setup
+
 const p1 = new THREE.Mesh(new THREE.BoxGeometry(player.h,player.y ,player.z), mat.p1);
 const p2 = new THREE.Mesh(new THREE.BoxGeometry(player.h,player.y ,player.z), mat.p2);
 p1.position.set(-(ring.y * 2/5),0,0);
@@ -77,12 +89,13 @@ p2.position.set((ring.y * 2/5),0,0);
 
 let p1_score = 0;
 let p2_score = 0;
-
 let p1_move_y = 0;
 let p2_move_y = 0;
 
+//Ball setup
+
 let ball_radius = ring.y / 80;
-let ball_speed = ring.y/150;
+let ball_speed = ring.y / 150;
 const ball = new THREE.Mesh( new THREE.SphereGeometry( ball_radius ), mat.ball );
 let angle =  Math.floor(Math.random() * 70);
 if (angle % 2)
@@ -90,14 +103,16 @@ if (angle % 2)
 if (angle % 3)
 	angle += 180;
 let hit_position = 0;
-let p1_hit = 0;
-let p2_hit = 0;
 ball.position.set(0,0,0);
+
+//Light setup
 
 let dirLight = new THREE.DirectionalLight( 0xffffff, 10 );
 dirLight.position.set( 0, 0, 400 );
 dirLight.target = ball;
 scene.add( dirLight );
+
+//Score setup
 
 let scoreText;
 
@@ -147,48 +162,28 @@ function updateScore() {
 	createScore();
 }
 
+//Game setup
+
 const game = new THREE.Group();
 game.add(ring3D, p1, p2, ball);
 scene.add(game);
 createScore();
 renderer.render( scene, camera );
 
-function p1IsHit()
-{
-	if ((ball.position.x - ball_radius - ball_speed <= p1.position.x + player.h / 2)
-		&& (ball.position.x - ball_speed > p1.position.x - player.h / 2)
-		&& (ball.position.y - ball_radius <= p1.position.y + player.y / 2)
-		&& (ball.position.y + ball_radius >= p1.position.y - player.y / 2))
-		return true;
-	return false;	
-}
-
-function p2IsHit()
-{
-	if ((ball.position.x + ball_radius + ball_speed >= p2.position.x - player.h / 2 )
-		&& (ball.position.x + ball_speed < p2.position.x + player.h / 2)
-		&& (ball.position.y - ball_radius <= p2.position.y + player.y / 2)
-		&& (ball.position.y + ball_radius >= p2.position.y - player.y / 2))
-		return true;
-	return false;	
-}
-
-let wallHitPosition = 0;
+//Game logic
 
 function animate() {
 	if (!isPaused) {
 		if (p1IsHit()) {
 			hit_position = (ball.position.y - p1.position.y);
 			wallHitPosition = 0;
-			p1_hit = 1;
 			angle = hit_position / (player.h,player.y) * -90;
 			if (ball_speed < 5 * player.h )
 				ball_speed += 0.1;
-		} //p1
+		}
 		else if	(p2IsHit()) {
 			hit_position = (ball.position.y - p2.position.y);
 			wallHitPosition = 0;
-			p2_hit = 1;
 			angle = 180 + (hit_position / (player.h,player.y) * 90);
 			if (ball_speed < 5 * player.h )
 				ball_speed += 0.1;
@@ -221,9 +216,105 @@ function animate() {
 	renderer.render( scene, camera );
 }
 
-requestAnimationFrame(animate);
+function p1IsHit()
+{
+	if ((ball.position.x - ball_radius - ball_speed <= p1.position.x + player.h / 2)
+		&& (ball.position.x - ball_speed > p1.position.x - player.h / 2)
+		&& (ball.position.y - ball_radius <= p1.position.y + player.y / 2)
+		&& (ball.position.y + ball_radius >= p1.position.y - player.y / 2))
+		return true;
+	return false;	
+}
 
+function p2IsHit()
+{
+	if ((ball.position.x + ball_radius + ball_speed >= p2.position.x - player.h / 2 )
+		&& (ball.position.x + ball_speed < p2.position.x + player.h / 2)
+		&& (ball.position.y - ball_radius <= p2.position.y + player.y / 2)
+		&& (ball.position.y + ball_radius >= p2.position.y - player.y / 2))
+		return true;
+	return false;	
+}
 
+function score(){
+	wallHitPosition = 0;
+	updateScore();
+	ball.position.set(0, 0, 0);
+	ball_speed = ring.y / 150;
+	angle = Math.floor(Math.random() * 70);
+	if (angle % 2)
+		angle *= -1;
+	if (angle % 3)
+		angle += 180;
+
+	if (p1_score >= maxScore || p2_score >= maxScore) {
+        game_over();
+    }
+}
+
+//Game restart
+
+function restart_game(){
+	p1_score = 0;
+	p2_score = 0;
+	wallHitPosition = 0;1
+	document.getElementById('gameOverImage').style.display = 'none';
+	removeWinnerText();
+	updateScore();
+	ball.position.set(0, 0, 0);
+	ball_speed = ring.y / 150;
+	p1.position.set(-(ring.y * 2/5),0,0);
+	p2.position.set((ring.y * 2/5),0,0);
+	angle = Math.floor(Math.random() * 70);
+	if (angle % 2)
+		angle *= -1;
+	if (angle % 3)
+		angle += 180;
+	cam = {x : 0, y : 0,z : 100};
+	look = {x : 0, y : 0,z : 0};
+	camera.position.set(cam.x,cam.y, cam.z );
+	camera.lookAt( look.x,look.y,look.z )
+}
+
+//Game over
+
+let winnerText;
+
+function createWinnerText(winner) {
+    const loader = new FontLoader();
+    loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+        const geometry = new TextGeometry(`${winner} Wins!`, {
+            font: font,
+			size: 10,
+			depth: 1,
+			curveSegments: 12,
+            bevelEnabled: false,
+        });
+        geometry.computeBoundingBox();
+        const centerOffset = -0.5 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
+        winnerText = new THREE.Mesh(geometry, mat.score);
+        winnerText.position.set(centerOffset, 20, 0);
+        scene.add(winnerText);
+        renderer.render(scene, camera);
+    });
+}
+
+function removeWinnerText() {
+	if (winnerText) {
+		scene.remove(winnerText);
+	}
+}
+
+function game_over() {
+    isStarted = false;
+    isPaused = true;
+	document.getElementById('gameOverImage').style.display = 'block';
+	const winner = p1_score >= maxScore ? 'Player 1' : 'Player 2';
+    createWinnerText(winner);
+    showMainMenu();
+}
+
+//Keyboard setup
 
 document.addEventListener("keydown", function(event) {
 	if (event.key.toLowerCase() == 'w')
@@ -271,82 +362,7 @@ document.addEventListener("wheel", function(event) {
 // 	console.log(mouse);
 // });Math.floor(Math.random() * 70)
 
-  function restart_game(){
-	p1_score = 0;
-	p2_score = 0;
-	wallHitPosition = 0;1
-	document.getElementById('gameOverImage').style.display = 'none';
-	removeWinnerText();
-	updateScore();
-	ball.position.set(0, 0, 0);
-	ball_speed = ring.y / 150;
-	p1.position.set(-(ring.y * 2/5),0,0);
-	p2.position.set((ring.y * 2/5),0,0);
-	angle = Math.floor(Math.random() * 70);
-	if (angle % 2)
-		angle *= -1;
-	if (angle % 3)
-		angle += 180;
-	cam = {x : 0, y : 0,z : 100};
-	look = {x : 0, y : 0,z : 0};
-	camera.position.set(cam.x,cam.y, cam.z );
-	camera.lookAt( look.x,look.y,look.z )
-  }
-
-function score(){
-	p2_hit = 0;
-	p1_hit = 0;
-	wallHitPosition = 0;
-	updateScore();
-	ball.position.set(0, 0, 0);
-	ball_speed = ring.y / 150;
-	angle = Math.floor(Math.random() * 70);
-	if (angle % 2)
-		angle *= -1;
-	if (angle % 3)
-		angle += 180;
-
-	if (p1_score >= maxScore || p2_score >= maxScore) {
-        game_over();
-    }
-}
-
-let winnerText;
-
-function createWinnerText(winner) {
-    const loader = new FontLoader();
-    loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-        const geometry = new TextGeometry(`${winner} Wins!`, {
-            font: font,
-			size: 10,
-			depth: 1,
-			curveSegments: 12,
-            bevelEnabled: false,
-        });
-        geometry.computeBoundingBox();
-        const centerOffset = -0.5 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
-        winnerText = new THREE.Mesh(geometry, mat.score);
-        winnerText.position.set(centerOffset, 20, 0);
-        scene.add(winnerText);
-        renderer.render(scene, camera);
-    });
-}
-
-function removeWinnerText() {
-	if (winnerText) {
-		scene.remove(winnerText);
-	}
-}
-
-function game_over() {
-    isStarted = false;
-    isPaused = true;
-	document.getElementById('gameOverImage').style.display = 'block';
-	const winner = p1_score >= maxScore ? 'Player 1' : 'Player 2';
-    createWinnerText(winner);
-    showMainMenu();
-}
-
+//Menu setup
 
 document.getElementById('newGameButton').addEventListener('click', showGameModeMenu);
 document.getElementById('settingsButton').addEventListener('click', showSettingsMenu);
@@ -372,7 +388,6 @@ function saveSettings() {
     const ringColor = document.getElementById('ringColor').value;
     const ringEmissive = document.getElementById('ringEmissive').value;
 
-    // Update the materials with the new colors and emissive colors
     mat.p1.color.set(player1Color);
     mat.p1.emissive.set(player1Emissive);
     mat.p2.color.set(player2Color);
