@@ -32,15 +32,16 @@ let player = {
 }
 
 let mat = {
-	ring : new THREE.MeshStandardMaterial( {color: 'red', emissive: 'blue', emissiveIntensity: 0.5, metalness: 0, roughness: 0} ),
+	ring : new THREE.MeshStandardMaterial( {color: '#ff0000', emissive: '#0000ff', emissiveIntensity: 0.5, metalness: 0, roughness: 0} ),
 	p1 : new THREE.MeshStandardMaterial( {color: '#4deeea', emissive: '#4deeea', emissiveIntensity: 0.5, metalness: 0, roughness: 0.5} ),
 	p2 : new THREE.MeshStandardMaterial( {color: '#ffe700', emissive: '#ffe700', emissiveIntensity: 0.5, metalness: 0, roughness: 0.5} ),
-	ball : new THREE.MeshStandardMaterial( {color: '#0bff01', emissive: 'green', emissiveIntensity: 1, metalness: 0, roughness: 0} ),
-	score : new THREE.MeshStandardMaterial( {color: '#0bff01', emissive: 'green', emissiveIntensity: 1, metalness: 1, roughness: 0.5} ),
+	ball : new THREE.MeshStandardMaterial( {color: '#0bff01', emissive: '#0bff01', emissiveIntensity: 1, metalness: 0, roughness: 0} ),
+	score : new THREE.MeshStandardMaterial( {color: '#0bff01', emissive: '#0bff01', emissiveIntensity: 1, metalness: 1, roughness: 0.5} ),
 }
 
 let isPaused = true;
 let isStarted = false;
+const maxScore = 1;
 
 camera.position.set(cam.x,cam.y, cam.z );
 camera.lookAt( look.x,look.y,look.z );
@@ -54,7 +55,6 @@ window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-	// renderer.render(scene, camera);
 });
 
 const r_bottom = new THREE.Mesh(new THREE.BoxGeometry(ring.y, ring.h, ring.z),mat.ring);
@@ -99,10 +99,56 @@ dirLight.position.set( 0, 0, 400 );
 dirLight.target = ball;
 scene.add( dirLight );
 
+let scoreText;
+
+function createScore() {
+	const loader = new FontLoader();
+	const font = loader.load(
+	// resource URL
+	'node_modules/three/examples/fonts/helvetiker_regular.typeface.json',
+
+	// onLoad callback
+	function ( font ) {
+		// do something with the font
+		const geometry = new TextGeometry( p1_score + ' : ' + p2_score, {
+			font: font,
+			size: 10,
+			depth: 1,
+			curveSegments: 12,
+			bevelEnabled: false,
+			bevelThickness: 1,
+			bevelSize: 10,
+			bevelOffset: 1,
+			bevelSegments: 5
+		} );
+		scoreText = new THREE.Mesh(geometry, mat.score);
+		scoreText.position.set(-12.4,ring.y / 3,0);
+		scene.add(scoreText);
+	},
+
+	// onProgress callback
+	function ( xhr ) {
+		// console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+	},
+
+	// onError callback
+	function ( err ) {
+		console.log( 'An error happened' );
+	}
+);
+}
+
+function updateScore() {
+    if (scoreText) {
+        scene.remove(scoreText);
+		createScore();
+    }
+}
+
 const game = new THREE.Group();
 game.add(ring3D, p1, p2, ball);
 scene.add(game);
-
+createScore();
 renderer.render( scene, camera );
 
 function p1IsHit()
@@ -188,14 +234,12 @@ document.addEventListener("keydown", function(event) {
 		p2_move_y = -ring.y/115;
 		console.log(event);
 	if (event.key == 'Escape' && isStarted) {
-		if (isPaused == false)
+		if (isPaused) {
+			resumeGame();
+		} else {
 			isPaused = true;
-		else
-			isPaused = false;
-		if (document.getElementById('menu').style.display == 'block')
-			document.getElementById('menu').style.display = 'none';
-		else
-		document.getElementById('menu').style.display = 'block';
+			showPauseMenu();
+		}
 	}
   });
 
@@ -226,11 +270,10 @@ document.addEventListener("wheel", function(event) {
 // });Math.floor(Math.random() * 70)
 
   function restart_game(){
-	scene.remove(scene.getObjectByName('txt'));
 	p1_score = 0;
 	p2_score = 0;
 	wallHitPosition = 0;
-	refresh_score();
+	updateScore();
 	ball.position.set(0, 0, 0);
 	ball_speed = ring.y / 150;
 	p1.position.set(-(ring.y * 2/5),0,0);
@@ -250,8 +293,7 @@ function score(){
 	p2_hit = 0;
 	p1_hit = 0;
 	wallHitPosition = 0;
-	scene.remove(scene.getObjectByName('txt'));
-	refresh_score();
+	updateScore();
 	ball.position.set(0, 0, 0);
 	ball_speed = ring.y / 150;
 	angle = Math.floor(Math.random() * 70);
@@ -259,49 +301,18 @@ function score(){
 		angle *= -1;
 	if (angle % 3)
 		angle += 180;
+
+	if (p1_score >= maxScore || p2_score >= maxScore) {
+        game_over();
+    }
 }
 
-function game_over(){
-
+function game_over() {
+    isStarted = false;
+    isPaused = true;
+    showMainMenu();
 }
 
-function refresh_score() {
-	const loader = new FontLoader();
-	const font = loader.load(
-	// resource URL
-	'node_modules/three/examples/fonts/helvetiker_regular.typeface.json',
-
-	// onLoad callback
-	function ( font ) {
-		// do something with the font
-		const geometry = new TextGeometry( p1_score + ' : ' + p2_score, {
-			font: font,
-			size: 10,
-			depth: 1,
-			curveSegments: 12,
-			bevelEnabled: false,
-			bevelThickness: 1,
-			bevelSize: 10,
-			bevelOffset: 1,
-			bevelSegments: 5
-		} );
-		const txt = new THREE.Mesh(geometry, mat.score);
-		txt.name = 'txt';
-		txt.position.set(-12.4,ring.y / 3,0);
-		scene.add(txt);
-	},
-
-	// onProgress callback
-	function ( xhr ) {
-		// console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
-	},
-
-	// onError callback
-	function ( err ) {
-		console.log( 'An error happened' );
-	}
-);
-}
 
 document.getElementById('newGameButton').addEventListener('click', showGameModeMenu);
 document.getElementById('settingsButton').addEventListener('click', showSettingsMenu);
@@ -311,7 +322,61 @@ document.getElementById('twoPlayerButton').addEventListener('click', startTwoPla
 document.getElementById('practiceButton').addEventListener('click', startPracticeGame);
 document.getElementById('backButton').addEventListener('click', showMainMenu);
 document.getElementById('saveSettingsButton').addEventListener('click', saveSettings);
+document.getElementById('resetSettingsButton').addEventListener('click', resetSettings);
 document.getElementById('backFromSettingsButton').addEventListener('click', showMainMenu);
+document.getElementById('resumeButton').addEventListener('click', resumeGame);
+document.getElementById('exitButtonPause').addEventListener('click', exitGame);
+
+
+function saveSettings() {
+    const player1Color = document.getElementById('player1Color').value;
+    const player1Emissive = document.getElementById('player1Emissive').value;
+    const player2Color = document.getElementById('player2Color').value;
+    const player2Emissive = document.getElementById('player2Emissive').value;
+    const ballColor = document.getElementById('ballColor').value;
+    const ballEmissive = document.getElementById('ballEmissive').value;
+    const ringColor = document.getElementById('ringColor').value;
+    const ringEmissive = document.getElementById('ringEmissive').value;
+
+    // Update the materials with the new colors and emissive colors
+    mat.p1.color.set(player1Color);
+    mat.p1.emissive.set(player1Emissive);
+    mat.p2.color.set(player2Color);
+    mat.p2.emissive.set(player2Emissive);
+    mat.ball.color.set(ballColor);
+    mat.ball.emissive.set(ballEmissive);
+    mat.ring.color.set(ringColor);
+    mat.ring.emissive.set(ringEmissive);
+
+    ring3D.material.color.set(ringColor);
+    ring3D.material.emissive.set(ringEmissive);
+
+    showMainMenu();
+}
+
+function resetSettings() {
+
+	document.getElementById('player1Color').value = '#4deeea';
+	document.getElementById('player1Emissive').value = '#4deeea';
+	document.getElementById('player2Color').value = '#ffe700';
+	document.getElementById('player2Emissive').value = '#ffe700';
+	document.getElementById('ballColor').value = '#0bff01';
+	document.getElementById('ballEmissive').value = '#0bff01';
+	document.getElementById('ringColor').value = '#ff0000';
+	document.getElementById('ringEmissive').value = '#0000ff';
+
+	mat.p1.color.set('#4deeea');
+    mat.p1.emissive.set('#4deeea');
+    mat.p2.color.set('#ffe700');
+    mat.p2.emissive.set('#ffe700');
+    mat.ball.color.set('#0bff01');
+    mat.ball.emissive.set('#0bff01');
+    mat.ring.color.set('#ff0000');
+    mat.ring.emissive.set('#0000ff');
+
+    ring3D.material.color.set(ringColor);
+    ring3D.material.emissive.set(ringEmissive);
+}
 
 function showGameModeMenu() {
     document.getElementById('menu').style.display = 'none';
@@ -321,12 +386,21 @@ function showGameModeMenu() {
 function showMainMenu() {
     document.getElementById('gameModeMenu').style.display = 'none';
     document.getElementById('settingsMenu').style.display = 'none';
+	document.getElementById('pauseMenu').style.display = 'none';
     document.getElementById('menu').style.display = 'block';
 }
 
 function showSettingsMenu() {
     document.getElementById('menu').style.display = 'none';
     document.getElementById('settingsMenu').style.display = 'block';
+}
+
+function showPauseMenu() {
+    document.getElementById('pauseMenu').style.display = 'block';
+}
+
+function hidePauseMenu() {
+    document.getElementById('pauseMenu').style.display = 'none';
 }
 
 function startOnePlayerGame() {
@@ -353,36 +427,17 @@ function startPracticeGame() {
     animate();
 }
 
-function saveSettings() {
-    const playerHeight = parseFloat(document.getElementById('playerHeight').value);
-    const playerWidth = parseFloat(document.getElementById('playerWidth').value);
-    const playerDepth = parseFloat(document.getElementById('playerDepth').value);
-
-    player.y = playerHeight;
-    player.h = playerWidth;
-    player.z = playerDepth;
-	
-	p1.geometry.dispose();
-    p1.geometry = new THREE.BoxGeometry(player.h, player.y, player.z);
-    p2.geometry.dispose();
-    p2.geometry = new THREE.BoxGeometry(player.h, player.y, player.z);
-
-	
-    showMainMenu();
+function resumeGame() {
+    hidePauseMenu();
+    isPaused = false;
+    animate();
 }
 
 function exitGame() {
     isStarted = false;
     isPaused = true;
-	player.h = 2.5;
-	player.y = ring.x / 6;
-	player.z = 5;
-	p1.geometry.dispose();
-	p2.geometry.dispose();
-	p1.geometry = new THREE.BoxGeometry(player.h, player.y, player.z);
-	p2.geometry = new THREE.BoxGeometry(player.h, player.y, player.z);
+	showMainMenu();
     restart_game();
 }
 
 document.getElementById('menu').style.display = 'block';
-
