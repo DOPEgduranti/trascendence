@@ -137,7 +137,8 @@ function createScore() {
 			bevelSegments: 5
 		} );
 		geometry.computeBoundingBox();
-        const centerOffset = -0.5 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
+		console.log(geometry.boundingBox);
+        const centerOffset = -(geometry.boundingBox.max.x - geometry.boundingBox.min.x) / 2;
 		scoreText = new THREE.Mesh(geometry, mat.score);
 		scoreText.position.set(centerOffset,ring.y / 3,0);
 		scene.add(scoreText);
