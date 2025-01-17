@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>My first three.js app</title>
-	<link rel="stylesheet" type="text/css" href="index.css">
+    <link rel="stylesheet" type="text/css" href="index.css">
     <script type="importmap">
         {
             "imports": {
@@ -14,28 +14,55 @@
     </script>
 </head>
 <body>
-	<div class="gamecontainer">
-		<div id="menu">
-			<button id="newGameButton">New Game</button>
-			<button id="settingsButton">Settings</button>
-			<button id="exitButton">Exit</button>
-		</div>
-		<div id="gameModeMenu" style="display: none;">
+    <div class="gamecontainer">
+        <div id="menu">
+            <button id="newGameButton">New Game</button>
+            <button id="settingsButton">Settings</button>
+            <button id="exitButton">Exit</button>
+        </div>
+        <div id="gameModeMenu" style="display: none;">
             <button id="onePlayerButton">1 Player</button>
             <button id="twoPlayerButton">2 Player</button>
-            <button id="practiceButton">Practice</button>
             <button id="backButton">Back</button>
         </div>
-		<div id="settingsMenu" style="display: none;">
-            <label for="playerHeight">Player Height:</label>
-            <input type="number" id="playerHeight" name="playerHeight" value="10">
-            <label for="playerWidth">Player Width:</label>
-            <input type="number" id="playerWidth" name="playerWidth" value="2.5">
-            <label for="playerDepth">Player Depth:</label>
-            <input type="number" id="playerDepth" name="playerDepth" value="5">
+        <div id="settingsMenu" style="display: none;">
+            <div class="color-setting">
+                <label for="player1Color">Player 1 Color:</label>
+                <div class="color-pickers">
+                    <input type="color" id="player1Color" name="player1Color" value="#4deeea">
+                    <input type="color" id="player1Emissive" name="player1Emissive" value="#4deeea">
+                </div>
+            </div>
+            <div class="color-setting">
+                <label for="player2Color">Player 2 Color:</label>
+                <div class="color-pickers">
+                    <input type="color" id="player2Color" name="player2Color" value="#ffe700">
+                    <input type="color" id="player2Emissive" name="player2Emissive" value="#ffe700">
+                </div>
+            </div>
+            <div class="color-setting">
+                <label for="ballColor">Ball Color:</label>
+                <div class="color-pickers">
+                    <input type="color" id="ballColor" name="ballColor" value="#0bff01">
+                    <input type="color" id="ballEmissive" name="ballEmissive" value="#00ff00">
+                </div>
+            </div>
+            <div class="color-setting">
+                <label for="ringColor">Ring Color:</label>
+                <div class="color-pickers">
+                    <input type="color" id="ringColor" name="ringColor" value="#ff0000">
+                    <input type="color" id="ringEmissive" name="ringEmissive" value="#0000ff">
+                </div>
+            </div>
             <button id="saveSettingsButton">Save</button>
+			<button id="resetSettingsButton">Reset</button>
             <button id="backFromSettingsButton">Back</button>
         </div>
+        <div id="pauseMenu" style="display: none;">
+            <button id="resumeButton">Resume Game</button>
+            <button id="exitButtonPause">Exit</button>
+        </div>
+		<img id="gameOverImage" src="gungeon.png" alt="Game Over" style="display: none;">
         <script type="module" src="/main.js"></script>
     </div>
 </body>

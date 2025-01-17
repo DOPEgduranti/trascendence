@@ -3,7 +3,7 @@ body {
     overflow: hidden;
 }
 
-#menu, #gameModeMenu, #settingsMenu {
+#menu, #gameModeMenu, #settingsMenu, #pauseMenu {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -13,22 +13,44 @@ body {
     border-radius: 10px;
     text-align: center;
     display: none;
-	color: rgb(194, 37, 155);
-	border-color: aquamarine;
-	border: 2px solid;
+    color: blueviolet;
 }
 
-#menu button, #gameModeMenu button, #settingsMenu button {
+#menu button, #gameModeMenu button, #settingsMenu button, #pauseMenu button {
     display: block;
     margin: 10px auto;
     padding: 10px 20px;
     font-size: 16px;
 }
 
-#settingsMenu label, #settingsMenu input {
+#settingsMenu .color-setting {
+    margin: 10px 0;
+}
+
+#settingsMenu .color-setting label {
     display: block;
-    margin: 10px auto;
+    margin-bottom: 5px;
     font-size: 16px;
+}
+
+#settingsMenu .color-pickers {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#settingsMenu .color-pickers input {
+    margin: 0 5px;
+    font-size: 16px;
+}
+
+#gameOverImage {
+    position: absolute;
+    top: 0%;
+    /* transform: translate(-50%, -50%); */
+    max-width: 10%;
+    max-height: 10%;
+    display: none;
 }
 
 .gamecontainer {
