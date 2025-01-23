@@ -5,31 +5,11 @@ import { Group, remove } from 'three/examples/jsm/libs/tween.module.js';
 
 // initializing variables
 
-let look = {
-	x : 0,
-	y : 0,
-	z : 0
-}
-
-let cam = {
-	x : 0,
-	y : 0,
-	z : 100
-}
-
-let ring = {
-	x : 0,
-	y : 150,
-	z : 10,
-	h : 3
-}
+let look = {x : 0, y : 0, z : 0}
+let cam = {x : 0, y : 0, z : 100}
+let ring = {x : 0, y : window.innerHeight * 15/100, z : 10, h : 3}
 ring.x = (9/16 * ring.y) - ring.h;
-
-let player = {
-	y : ring.x / 6,
-	h : 2.5,
-	z : 5
-}
+let player = {y : ring.x / 6,h : 2.5,z : 5}
 
 let mat = {
 	ring : new THREE.MeshStandardMaterial( {color: '#ff0000', emissive: '#0000ff', emissiveIntensity: 0.5, metalness: 0, roughness: 0} ),
@@ -57,13 +37,6 @@ renderer.setSize( window.innerWidth,window.innerHeight );
 renderer.setAnimationLoop( animate );
 document.body.appendChild( renderer.domElement );
 
-//Resize handler
-
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
 
 //Ring setup
 
@@ -354,6 +327,15 @@ function game_over() {
     showMainMenu();
 }
 
+//Resize handler
+
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+
 //Keyboard setup
 
 document.addEventListener("keydown", function(event) {
@@ -532,6 +514,7 @@ function startTwoPlayerGame() {
     restart_game();
     isStarted = true;
     isPaused = false;
+	IAisActive = false;
     animate();
 }
 
@@ -544,6 +527,7 @@ function resumeGame() {
 function exitGame() {
     isStarted = false;
     isPaused = true;
+	IAisActive = false;
 	showMainMenu();
     restart_game();
 }
