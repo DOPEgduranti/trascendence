@@ -278,7 +278,7 @@ function moveIA() {
 function restart_game(){
 	p1_score = 0;
 	p2_score = 0;
-	wallHitPosition = 0;1
+	wallHitPosition = 0;
 	document.getElementById('gameOverImage').style.display = 'none';
 	removeWinnerText();
 	scene.remove(particleSystem);
