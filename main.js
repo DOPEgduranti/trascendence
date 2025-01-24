@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+import Stats from 'stats.js';
 import { Group, remove } from 'three/examples/jsm/libs/tween.module.js';
 
 // initializing variables
@@ -136,6 +137,17 @@ function updateScore() {
 	createScore();
 }
 
+//stats setup
+
+const stats = new Stats();
+stats.showPanel(0);
+document.body.appendChild(stats.dom);
+stats.dom.style.display = 'none'; // Hide stats by default
+
+function toggleStats(show) {
+    stats.dom.style.display = show ? 'block' : 'none';
+}
+
 //Game setup
 
 const game = new THREE.Group();
@@ -150,6 +162,8 @@ let previousTimestamp = 0;
 const timeStep = 1000/ 60;
 
 const animate = (timestamp) => {
+	stats.begin();
+
 	requestAnimationFrame( animate );
 	const deltaTime = timestamp - previousTimestamp;
 	if (deltaTime >= timeStep) {
@@ -196,6 +210,7 @@ const animate = (timestamp) => {
 				p2.position.y += p2_move_y;
 		}
 		renderer.render( scene, camera );
+		stats.end();
 	}
 }
 requestAnimationFrame( animate );
@@ -281,6 +296,7 @@ function restart_game(){
 	wallHitPosition = 0;
 	document.getElementById('gameOverImage').style.display = 'none';
 	removeWinnerText();
+	disposeParticleSystem(particleSystem);
 	scene.remove(particleSystem);
 	[particleSystem = null];
 	updateScore();
@@ -316,9 +332,9 @@ function createParticleExplosion(position) {
         positions[i3 + 1] = position.y;
         positions[i3 + 2] = position.z;
 
-        velocities[i3] = (Math.random() - 0.5) * 3;
-        velocities[i3 + 1] = (Math.random() - 0.5) * 2;
-        velocities[i3 + 2] = (Math.random() - 0.5) * 3;
+        velocities[i3] = (Math.random() - 0.5) * 128;
+        velocities[i3 + 1] = (Math.random() - 0.5) * 128;
+        velocities[i3 + 2] = (Math.random() - 0.5) * 128;
 
         colors[i3] = Math.random();
         colors[i3 + 1] = Math.random();
@@ -356,6 +372,19 @@ function createParticleExplosion(position) {
         renderer.render(scene, camera);
     };
     animateParticles();
+
+	setTimeout(() => {
+        disposeParticleSystem(particleSystem);
+    }, 2000);
+}
+
+function disposeParticleSystem(particleSystem) {
+    if (particleSystem) {
+        particleSystem.geometry.dispose();
+        particleSystem.material.dispose();
+        scene.remove(particleSystem);
+        particleSystem = null;
+    }
 }
 
 let winnerText;
@@ -386,7 +415,7 @@ function removeWinnerText() {
 }
 
 function game_over() {
-	createParticleExplosion(ball.position);
+	// createParticleExplosion(ball.position);
     isStarted = false;
     isPaused = true;
 	const winner = p1_score >= maxScore ? 'Player 1' : 'Player 2';
@@ -496,6 +525,10 @@ document.getElementById('ringEmissive').addEventListener('input', (event) => {
     mat.ring.emissive.set(event.target.value);
 });
 
+document.getElementById('showStats').addEventListener('change', (event) => {
+    toggleStats(event.target.checked);
+});
+
 function saveSettings() {
 	const player1Color = document.getElementById('player1Color').value;
     const player1Emissive = document.getElementById('player1Emissive').value;
@@ -541,6 +574,7 @@ function resetSettings() {
 
     ring3D.material.color.set(ringColor);
     ring3D.material.emissive.set(ringEmissive);
+	
 }
 
 function showGameModeMenu() {
