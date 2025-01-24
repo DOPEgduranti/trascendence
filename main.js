@@ -7,7 +7,7 @@ import { Group, remove } from 'three/examples/jsm/libs/tween.module.js';
 
 let look = {x : 0, y : 0, z : 0}
 let cam = {x : 0, y : 0, z : 100}
-let ring = {x : 0, y : window.innerHeight * 15/100, z : 10, h : 3}
+let ring = {x : 0, y: 150, z : 10, h : 3}
 ring.x = (9/16 * ring.y) - ring.h;
 let player = {y : ring.x / 6,h : 2.5,z : 5}
 
@@ -22,7 +22,7 @@ let mat = {
 let isPaused = true;
 let isStarted = false;
 let IAisActive = false;
-const maxScore = 3;
+const maxScore = 1;
 let wallHitPosition = 0;
 
 //Scene setup
@@ -34,7 +34,6 @@ camera.lookAt( look.x,look.y,look.z );
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize( window.innerWidth,window.innerHeight );
-renderer.setAnimationLoop( animate );
 document.body.appendChild( renderer.domElement );
 
 
@@ -147,50 +146,59 @@ renderer.render( scene, camera );
 
 //Game logic
 
-function animate() {
-	if (!isPaused) {
-		if (p1IsHit()) {
-			hit_position = (ball.position.y - p1.position.y);
-			wallHitPosition = 0;
-			angle = hit_position / (player.h,player.y) * -90;
-			if (ball_speed < 5 * player.h )
-				ball_speed += 0.1;
-		}
-		else if	(p2IsHit()) {
-			hit_position = (ball.position.y - p2.position.y);
-			wallHitPosition = 0;
-			angle = 180 + (hit_position / (player.h,player.y) * 90);
-			if (ball_speed < 5 * player.h )
-				ball_speed += 0.1;
-		}
-		else if ((wallHitPosition <= 0 && ball.position.y + ball_radius + ball_speed >= ring.x / 2)
-			|| (wallHitPosition >= 0 && ball.position.y - ball_radius - ball_speed <= -ring.x / 2 )){
-				wallHitPosition = ball.position.y;
-				angle *= -1;
+let previousTimestamp = 0;
+const timeStep = 1000/ 60;
+
+const animate = (timestamp) => {
+	requestAnimationFrame( animate );
+	const deltaTime = timestamp - previousTimestamp;
+	if (deltaTime >= timeStep) {
+		previousTimestamp = timestamp;
+		if (!isPaused) {
+			if (p1IsHit()) {
+				hit_position = (ball.position.y - p1.position.y);
+				wallHitPosition = 0;
+				angle = hit_position / (player.h,player.y) * -90;
+				if (ball_speed < 5 * player.h )
+					ball_speed += 0.1;
 			}
-		else if (ball.position.x - ball_radius < r_left.position.x + ring.h) {
-			console.log("p2 ha segnato");
-			p2_score += 1;
-			score();
+			else if	(p2IsHit()) {
+				hit_position = (ball.position.y - p2.position.y);
+				wallHitPosition = 0;
+				angle = 180 + (hit_position / (player.h,player.y) * 90);
+				if (ball_speed < 5 * player.h )
+					ball_speed += 0.1;
+			}
+			else if ((wallHitPosition <= 0 && ball.position.y + ball_radius + ball_speed >= ring.x / 2)
+				|| (wallHitPosition >= 0 && ball.position.y - ball_radius - ball_speed <= -ring.x / 2 )){
+					wallHitPosition = ball.position.y;
+					angle *= -1;
+				}
+			else if (ball.position.x - ball_radius < r_left.position.x + ring.h) {
+				console.log("p2 ha segnato");
+				p2_score += 1;
+				score();
+			}
+			else if (ball.position.x + ball_radius > r_right.position.x - ring.h) {
+				console.log("p1 ha segnato");
+				p1_score += 1;
+				score();
+			}
+			ball.position.y += ball_speed * -Math.sin(angle * Math.PI /180);
+			ball.position.x += ball_speed * Math.cos(angle * Math.PI /180);
+			if ((p1_move_y > 0 && p1.position.y + player.y / 2 <= ring.x / 2 - ring.h / 2) 
+				|| (p1_move_y < 0 && p1.position.y - player.y / 2 >= - ring.x / 2 + ring.h / 2))
+				p1.position.y += p1_move_y;
+			if (IAisActive)
+				moveIA();
+			if ((p2_move_y > 0 && p2.position.y + player.y / 2 <= ring.x / 2 - ring.h / 2)
+				|| (p2_move_y < 0 && p2.position.y - player.y / 2 >= - ring.x / 2 + ring.h / 2))
+				p2.position.y += p2_move_y;
 		}
-		else if (ball.position.x + ball_radius > r_right.position.x - ring.h) {
-			console.log("p1 ha segnato");
-			p1_score += 1;
-			score();
-		}
-		ball.position.y += ball_speed * -Math.sin(angle * Math.PI /180);
-		ball.position.x += ball_speed * Math.cos(angle * Math.PI /180);
-		if ((p1_move_y > 0 && p1.position.y + player.y / 2 <= ring.x / 2 - ring.h / 2) 
-			|| (p1_move_y < 0 && p1.position.y - player.y / 2 >= - ring.x / 2 + ring.h / 2))
-			p1.position.y += p1_move_y;
-		if (IAisActive)
-			moveIA();
-		if ((p2_move_y > 0 && p2.position.y + player.y / 2 <= ring.x / 2 - ring.h / 2)
-			|| (p2_move_y < 0 && p2.position.y - player.y / 2 >= - ring.x / 2 + ring.h / 2))
-			p2.position.y += p2_move_y;
+		renderer.render( scene, camera );
 	}
-	renderer.render( scene, camera );
 }
+requestAnimationFrame( animate );
 
 function p1IsHit()
 {
@@ -232,7 +240,7 @@ function score(){
 
 function moveIA() {
 	const iaSpeed = ring.y / 200;
-    const delay = 1;
+    const delay = 0.01;
     const timeStep = 0.01;
     let simulatedBallY = ball.position.y;
     let simulatedBallX = ball.position.x;
@@ -273,6 +281,8 @@ function restart_game(){
 	wallHitPosition = 0;1
 	document.getElementById('gameOverImage').style.display = 'none';
 	removeWinnerText();
+	scene.remove(particleSystem);
+	[particleSystem = null];
 	updateScore();
 	ball.position.set(0, 0, 0);
 	ball_speed = ring.y / 150;
@@ -290,6 +300,63 @@ function restart_game(){
 }
 
 //Game over
+
+let particleSystem;
+
+function createParticleExplosion(position) {
+    const particleCount = 1000;
+    const particles = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    const velocities = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+
+    for (let i = 0; i < particleCount; i++) {
+        const i3 = i * 6;
+        positions[i3] = position.x;
+        positions[i3 + 1] = position.y;
+        positions[i3 + 2] = position.z;
+
+        velocities[i3] = (Math.random() - 0.5) * 3;
+        velocities[i3 + 1] = (Math.random() - 0.5) * 2;
+        velocities[i3 + 2] = (Math.random() - 0.5) * 3;
+
+        colors[i3] = Math.random();
+        colors[i3 + 1] = Math.random();
+        colors[i3 + 2] = Math.random();
+    }
+
+    particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    particles.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3));
+    particles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+    const pMaterial = new THREE.PointsMaterial({
+        size: 0.5,
+        vertexColors: true,
+        blending: THREE.AdditiveBlending,
+        transparent: true
+    });
+
+    particleSystem = new THREE.Points(particles, pMaterial);
+    scene.add(particleSystem);
+
+    // Animate particles
+    const animateParticles = () => {
+        requestAnimationFrame(animateParticles);
+        const positions = particles.attributes.position.array;
+        const velocities = particles.attributes.velocity.array;
+
+        for (let i = 0; i < particleCount; i++) {
+            const i3 = i * 3;
+            positions[i3] += velocities[i3] * 0.1;
+            positions[i3 + 1] += velocities[i3 + 1] * 0.1;
+            positions[i3 + 2] += velocities[i3 + 2] * 0.1;
+        }
+
+        particles.attributes.position.needsUpdate = true;
+        renderer.render(scene, camera);
+    };
+    animateParticles();
+}
 
 let winnerText;
 
@@ -319,9 +386,9 @@ function removeWinnerText() {
 }
 
 function game_over() {
+	createParticleExplosion(ball.position);
     isStarted = false;
     isPaused = true;
-	document.getElementById('gameOverImage').style.display = 'block';
 	const winner = p1_score >= maxScore ? 'Player 1' : 'Player 2';
     createWinnerText(winner);
 	sendScore(p1_score, p2_score);
@@ -355,8 +422,8 @@ document.addEventListener("keydown", function(event) {
 			isPaused = true;
 			showPauseMenu();
 		}
-	}
-  });
+		}
+	});
 
   document.addEventListener("keyup", function(event) {
 	if (event.key.toLowerCase() == 'w')
@@ -375,14 +442,14 @@ document.addEventListener("wheel", function(event) {
 	camera.position.set(cam.x,cam.y, cam.z );
 });
 
-// document.addEventListener("mousemove", function(event) {
-// 	const rect = renderer.domElement.getBoundingClientRect();
-// 	const mouse = {
-// 		x: ((event.clientX - rect.left) / rect.width) * 2 - 1,
-// 		y: -((event.clientY - rect.top) / rect.height) * 2 + 1
-// 	};
-// 	console.log(mouse);
-// });Math.floor(Math.random() * 70)
+document.addEventListener("mousemove", function(event) {
+	const rect = renderer.domElement.getBoundingClientRect();
+	const mouse = {
+		x: ((event.clientX - rect.left) / rect.width) * 2 - 1,
+		y: -((event.clientY - rect.top) / rect.height) * 2 + 1
+	};
+	// console.log(mouse);
+});Math.floor(Math.random() * 70)
 
 //Menu setup
 
@@ -508,6 +575,7 @@ function startOnePlayerGame() {
 	IAisActive = true;
     isPaused = false;
     animate();
+
 }
 
 function startTwoPlayerGame() {
